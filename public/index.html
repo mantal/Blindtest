@@ -12,8 +12,11 @@
         <button id="stop" hidden>stop</button>
         <button id="next">next</button>
 
+        <input type="range" value="100" id="volume"></input>
+
         <select id="music-list">
         </select>
+
     </div>
 
     <ul id="messages"></ul>
@@ -21,14 +24,19 @@
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
 
-    <audio><source type="audio/mp3"></audio>
+    <audio id="player"><source type="audio/mp3"></audio>
 
     <script type="text/javascript" src="jquery.js"></script>
     <script src="/socket.io/socket.io.js"></script>
 
     <script type="text/javascript">
-    $('document').ready(function(){
+      $('document').ready(function(){
       var socket = io.connect('http://localhost:3000');
+
+      $("#volume").change(function(){
+        $('#player').prop('volume', $('#volume').val() / 100);
+
+      });
 
       $('form').submit(function() {
         socket.emit('chat-message', $('#m').val());
