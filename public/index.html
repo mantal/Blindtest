@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+  <head>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <title>Blind test</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <div id="header">
+        <button id="play">play</button>
+        <button id="pause" hidden>pause</button>
+        <button id="stop" hidden>stop</button>
+        <button id="next">next</button>
+
+        <select id="music-list">
+        </select>
+    </div>
+
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+
+    <audio><source type="audio/mp3"></audio>
+
+    <script type="text/javascript" src="jquery.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script type="text/javascript">
+    $('document').ready(function(){
+      var socket = io.connect('http://localhost:3000');
+
+      $('form').submit(function() {
+        socket.emit('chat-message', $('#m').val());
+        $('#m').val('');
+        return false;
+      });
+
+      $('#play').click(function() {
+        socket.emit('play', '/musics/' + $('#music-list :selected').parent().attr('label') + '/' + $('#music-list :selected').val());
+      });
+
+      $('#pause').click(function() {
+        socket.emit('pause');
+      });
+
+      $('#stop').click(function() {
+        socket.emit('stop');
+      });
+      
+      $('#next').click(function() {
+        socket.emit('next');
+      });
+
+      socket.on('chat-message', function(msg) {
+        message(msg);
+        console.log('Message: ', msg);
+      });
+
+      socket.on('play', function(msg) {
+        $('audio').attr('src', msg)[0].play();
+        console.log('play');
+        $('#play').hide();
+        $('#pause').show();
+        $('#stop').show();
+      });
+
+      socket.on('pause', function() {
+        $('audio')[0].pause();
+        console.log('pause');
+        $('#play').show();
+        $('#pause').hide();
+      });
+
+      socket.on('stop', function() {
+        $('audio')[0].pause();
+        $('audio')[0].currentTime = 0.0;
+        console.log('stop');
+        $('#play').show();
+        $('#pause').hide();
+        $('#stop').hide();
+      });
+
+      socket.on('music-list', function(msg) {
+          var musics = JSON.parse(msg);
+          console.log('music-list');
+          $('#music-list').empty();
+
+          addMusicToList('easy', musics.easy);
+          addMusicToList('medium', musics.medium);
+          addMusicToList('hard', musics.hard);
+          addMusicToList('expert', musics.expert);
+          addMusicToList('bonus', musics.bonus);
+      });
+
+      function message(msg) {
+        $('#messages').append($('<li>').text(msg));
+      }
+
+      function addMusicToList(group, musics) {
+        var optgroup = $('<optgroup>', {
+            value: group,
+            label: group
+          });
+
+        musics.forEach(function(m) {
+          optgroup.append($('<option>', {
+            value: m,
+            text: m
+          }));
+        });
+        $('#music-list').append(optgroup);
+      }
+    });
+    </script>
+  </body>
+</html>
