@@ -21,6 +21,9 @@ musics['bonus'] = fs.readdirSync(musicDir + '/bonus');
 
 io.on('connection', function(socket) {
 
+	users.push(socket);
+	console.log('New client connected (id=' + socket.id + ')');
+
 	socket.on('chat-message', function(msg) {
 		io.emit('chat-message', msg);
 		console.log('Message:', msg);

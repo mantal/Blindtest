@@ -35,7 +35,6 @@
 
       $("#volume").change(function(){
         $('#player').prop('volume', $('#volume').val() / 100);
-
       });
 
       $('form').submit(function() {
@@ -57,7 +56,20 @@
       });
       
       $('#next').click(function() {
-        socket.emit('next');
+
+        var selected = $('#music-list option:selected');
+        var next = selected.next();
+
+        if (next.length === 0)
+        {
+          if (selected.parent().next().length == 0)
+            return;
+          next = selected.parent().next().children().first();
+        }
+
+        next.prop('selected', true);
+        
+        $('#play').click();
       });
 
       socket.on('chat-message', function(msg) {
